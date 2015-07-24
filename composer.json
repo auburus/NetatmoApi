@@ -1,4 +1,17 @@
 {
+    "name": "auburus/netatmo-api",
+    "type": "library",
+    "description": "Netatmo Provider for the league/oauth2-client library",
+    "keywords": ["netatmo", "api", "provider", "oauth2"],
+    "homepage": "https://github.com/auburus/NetatmoApi",
+    "licence": "MIT",
+    "authors": [
+        {
+            "name": "Jordi Nonell",
+            "email": "jordi.nopa@gmail.com",
+            "role": "Developer"
+        }
+    ],
     "require": {
         "league/oauth2-client": "^0.12.1"
     },
