@@ -1,6 +1,6 @@
 # NetatmoApi
 
-This is a Provider implementation for the (league/OAuth2-client)[https://github.com/thephpleague/oauth2-client] library.
+This is a Provider implementation for the [league/OAuth2-client](https://github.com/thephpleague/oauth2-client) library.
 
 ## Install
 
@@ -13,7 +13,7 @@ $ composer require league/oauth2-client
 ## Usage
 
 This is an (slightly changed) copy of the provided 
-(usage)[https://github.com/thephpleague/oauth2-client/blob/master/README.md#usage] example.
+[usage](https://github.com/thephpleague/oauth2-client/blob/master/README.md#usage) example.
 
 ``` php
 $provider = new Auburus\OAuth2\Client\Provider\Netatmo([
