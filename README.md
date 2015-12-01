@@ -7,13 +7,12 @@ This is a Provider implementation for the [league/OAuth2-client](https://github.
 Via Composer
 
 ``` bash
-$ composer require auburus/netatmo-api:~1.0.0
+$ composer require auburus/netatmo-api:~0.2.0
 ```
 
 ## Usage
 
-This is an (slightly changed) copy of the provided 
-[usage](https://github.com/thephpleague/oauth2-client/blob/master/README.md#usage) example.
+Here's a code based on the [usage example](https://github.com/thephpleague/oauth2-client/blob/master/README.md#usage) example.
 
 ``` php
 <?php
@@ -21,6 +20,7 @@ This is an (slightly changed) copy of the provided
 require_once 'vendor/autoload.php';
 
 use Auburus\OAuth2\Client\Provider\Netatmo;
+use GuzzleHttp\Exception\RequestException;
 
 session_start();
 
@@ -28,15 +28,25 @@ $provider = new Netatmo([
     'clientId'      => 'XXXXXXXX',
     'clientSecret'  => 'XXXXXXXX',
     'redirectUri'   => 'https://your-registered-redirect-uri/',
-    'scopes'        => ['email', '...', '...'],
 ]);
+
+// Handles the case when the user choose to NOT authorize
+if (isset($_GET['error'])) {
+    echo $_GET['error'];
+    exit;
+}
 
 if (!isset($_GET['code'])) {
 
-    // If we don't have an authorization code then get one
-    $authUrl = $provider->getAuthorizationUrl();
-    $_SESSION['oauth2state'] = $provider->state;
-    header('Location: '.$authUrl);
+
+    $authorizationUrl = $provider->getAuthorizationUrl([
+        'scope' => ['read_station']
+    ]);
+
+    $_SESSION['oauth2state'] = $provider->getState();
+
+    // Redirect the user to the authorization URL.
+    header('Location: ' . $authorizationUrl);
     exit;
 
 // Check given state against previously stored one to mitigate CSRF attack
@@ -47,51 +57,54 @@ if (!isset($_GET['code'])) {
 
 } else {
 
-    // Try to get an access token (using the authorization code grant)
-    $token = $provider->getAccessToken('authorization_code', [
-        'code' => $_GET['code']
-    ]);
-
-    // Optional: Now you have a token you can look up a users profile data
     try {
 
-        // We got an access token, let's now get the user's details
-        $userDetails = $provider->getUserDetails($token);
+        // Try to get an access token using the authorization code grant.
+        $accessToken = $provider->getAccessToken('authorization_code', [
+            'code' => $_GET['code']
+        ]);
 
-        var_dump($userDetails);
-        //  {
-        //      "body": {
-        //          "_id": "user_id",
-        //          "administrative": {
-        //              "country": "US",
-        //              "reg_locale": "en-US",
-        //              "lang": "en-US",
-        //              "unit": 0,
-        //              "windunit": 0,
-        //              "pressureunit": 0,
-        //              "feel_like_algo": 0
-        //          },
-        //          "mail": "mail@example.com",
-        //      },
-        //      "status": "ok",
-        //      "time_exec": 0.0044600963592529,
-        //      "time_server": 1437753697
-        //  }
+        // We have an access token, which we may use in authenticated
+        // requests against the service provider's API.
+        echo $accessToken->getToken() . "<br>";
+        echo $accessToken->getRefreshToken() . "<br>";
+        echo $accessToken->getExpires() . "<br>";
+        echo ($accessToken->hasExpired() ? 'expired' : 'not expired') . "<br>";
 
-    } catch (Exception $e) {
+        // Using the access token, we may look up details about the
+        // resource owner.
+        $resourceOwner = $provider->getResourceOwner($accessToken);
 
-        // Failed to get user details
-        exit("Oh dear...");
+        var_export($resourceOwner->toArray());
+
+        echo '<br>';
+
+        var_dump($resourceOwner->getWindUnit());
+
+        // The provider provides a way to get an authenticated API request for
+        // the service, using the access token; it returns an object conforming
+        // to Psr\Http\Message\RequestInterface.
+        $request = $provider->getAuthenticatedRequest(
+            'GET',
+            'https://api.netatmo.com/api/getstationsdata?access_token=' . $accessToken,
+            $accessToken
+        );
+
+        try {
+            //$response = $provider->getHttpClient()->send($request);
+            //echo $response->getBody();
+        } catch (RequestException $e) {
+            echo "<h1>ERROR!</h1>";
+            echo $e->getResponse()->getBody();
+        }
+
+    } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+
+        // Failed to get the access token or user details.
+        exit($e->getMessage());
+
     }
 
-    // Use this to interact with an API on the users behalf
-    echo $token->accessToken . PHP_EOL;
-
-    // Use this to get a new access token if the old one expires
-    echo $token->refreshToken . PHP_EOL;
-
-    // Unix timestamp of when the token will expire, and need refreshing
-    echo $token->expires . PHP_EOL;
 }
 
 ```

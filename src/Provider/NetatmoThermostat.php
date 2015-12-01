@@ -5,17 +5,19 @@ namespace Auburus\OAuth2\Client\Provider;
 use League\OAuth2\Client\Token\AccessToken;
 use Auburus\OAuth2\Client\Provider\Exception\ResourceOwnerException;
 
-class Netatmo extends BaseNetatmo
+class NetatmoThermostat extends BaseNetatmo
 {
+    /**
+     * {@inheritdoc}
+     */
     public function getResourceOwnerDetailsUrl(AccessToken $token) {
-        throw new ResourceOwnerException('Use one of the specific subclasses ' .
-            'to retrieve the resource owner');
+        return 'https://api.netatmo.net/api/getthermostatsdata?access_token=' . $token;
     }
 
     /**
      * {@inheritdoc}
      */
     public function getDefaultScopes() {
-        return [];
+        return ['read_thermostat'];
     }
 }
