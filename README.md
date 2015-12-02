@@ -101,7 +101,7 @@ if (!isset($_GET['code'])) {
 
 ## Using Resource Owner ##
 The original [league/OAuth2-client](https://github.com/thephpleague/oauth2-client)
-provides the `$provider->getResourceOwner` method to access the user data.
+provides the `$provider->getResourceOwner()` method to access the user data.
 Although it's very convinient, the Netatmo Api has recently deprecated the
 api endpoint to access to those information, and has embedded it in some other methods.
 
@@ -110,9 +110,9 @@ specific provider than the `Netatmo`.
 
 Scope             | Provider
 ------            | ------
-`read_station`    | [NetatmoStation](blob/master/src/Provider/NetatmoStation.php)
-`read_thermostat` | [NetatmoThermostat](blob/master/src/Provider/NetatmoThermostat.php)
-`read_camera`     | [NetatmoHome](blob/master/src/Provider/NetatmoHome.php)
+`read_station`    | [NetatmoStation](src/Provider/NetatmoStation.php)
+`read_thermostat` | [NetatmoThermostat](src/Provider/NetatmoThermostat.php)
+`read_camera`     | [NetatmoHome](src/Provider/NetatmoHome.php)
 
 
 So, the example will result in:
