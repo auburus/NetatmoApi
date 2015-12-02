@@ -71,16 +71,6 @@ if (!isset($_GET['code'])) {
         echo $accessToken->getExpires() . "<br>";
         echo ($accessToken->hasExpired() ? 'expired' : 'not expired') . "<br>";
 
-        // Using the access token, we may look up details about the
-        // resource owner.
-        $resourceOwner = $provider->getResourceOwner($accessToken);
-
-        var_export($resourceOwner->toArray());
-
-        echo '<br>';
-
-        var_dump($resourceOwner->getWindUnit());
-
         // The provider provides a way to get an authenticated API request for
         // the service, using the access token; it returns an object conforming
         // to Psr\Http\Message\RequestInterface.
@@ -91,8 +81,8 @@ if (!isset($_GET['code'])) {
         );
 
         try {
-            //$response = $provider->getHttpClient()->send($request);
-            //echo $response->getBody();
+            $response = $provider->getHttpClient()->send($request);
+            echo $response->getBody();
         } catch (RequestException $e) {
             echo "<h1>ERROR!</h1>";
             echo $e->getResponse()->getBody();
@@ -108,3 +98,50 @@ if (!isset($_GET['code'])) {
 }
 
 ```
+
+## Using Resource Owner ##
+The original [league/OAuth2-client](https://github.com/thephpleague/oauth2-client)
+provides the `$provider->getResourceOwner` method to access the user data.
+Although it's very convinient, the Netatmo Api has recently deprecated the
+api endpoint to access to those information, and has embedded it in some other methods.
+
+So, depending on the api scope you will use, you should use a "slighly more"
+specific provider than the `Netatmo`.
+
+Scope             | Provider
+------            | ------
+`read_station`    | [NetatmoStation](blob/master/src/Provider/NetatmoStation.php)
+`read_thermostat` | [NetatmoThermostat](blob/master/src/Provider/NetatmoThermostat.php)
+`read_camera`     | [NetatmoHome](blob/master/src/Provider/NetatmoHome.php)
+
+
+So, the example will result in:
+
+```php
+<?php
+use Auburus\OAuth2\Client\Provider\NetatmoThermostat;
+
+$provider = new NetatmoThermostat([
+    'clientId'      => 'XXXXXXXX',
+    'clientSecret'  => 'XXXXXXXX',
+    'redirectUri'   => 'https://your-registered-redirect-uri/',
+]);
+
+// (All the OAuth2 proces...)
+// ...
+
+
+$resourceOwner = $provider->getResourceOwner($accessToken);
+
+var_export($resourceOwner->toArray());
+```
+
+Note that you can still use all provider methods, as `getAuthenticatedRequest`.
+
+I personally suggest declaring the provider as:
+
+```php
+use Auburus\OAuth2\Client\Provider\NetatmoThermostat as Netatmo;
+```
+So as long as you use the right scope when requesting authorization, you can 
+assume it's the normal Netatmo provider.
