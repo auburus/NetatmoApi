@@ -14,28 +14,32 @@ abstract class BaseNetatmo extends AbstractProvider
     /**
      * {@inheritdoc}
      */
-    public function getBaseAuthorizationUrl() {
+    public function getBaseAuthorizationUrl()
+    {
         return 'https://api.netatmo.net/oauth2/authorize';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getBaseAccessTokenUrl(array $params) {
+    public function getBaseAccessTokenUrl(array $params)
+    {
         return 'https://api.netatmo.net/oauth2/token';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getScopeSeparator() {
+    public function getScopeSeparator()
+    {
         return ' ';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function checkResponse(ResponseInterface $response, $data) {
+    public function checkResponse(ResponseInterface $response, $data)
+    {
         if ($response->getStatusCode() >= 400) {
             throw new IdentityProviderException(
                 $response->getReasonPhrase(),

@@ -10,14 +10,16 @@ class NetatmoThermostat extends BaseNetatmo
     /**
      * {@inheritdoc}
      */
-    public function getResourceOwnerDetailsUrl(AccessToken $token) {
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
+    {
         return 'https://api.netatmo.net/api/getthermostatsdata?access_token=' . $token;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getDefaultScopes() {
+    public function getDefaultScopes()
+    {
         return ['read_thermostat'];
     }
 }

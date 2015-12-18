@@ -19,5 +19,8 @@
         "psr-4": {
             "Auburus\\OAuth2\\Client\\": "src"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^2.5"
     }
 }
